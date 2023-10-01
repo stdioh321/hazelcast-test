@@ -1,4 +1,5 @@
-const { Client, Predicates } = require('hazelcast-client');
+
+const { Client, Predicates, ClientConfig } = require('hazelcast-client');
 import express from 'express';
 
 const app = express();
@@ -6,6 +7,8 @@ app.use(express.json());
 
 
 const port = process.env.PORT || 3000;
+const HAZELCAST_HOST = process.env.HAZELCAST_HOST || 'localhost'
+const HAZELCAST_PORT = process.env.HAZELCAST_PORT || 5701
 
 
 app.get('/', async (req, res) => {
@@ -24,7 +27,12 @@ app.listen(port, () => {
 
 async function main() {
   // Configure Hazelcast client
-  const client = await Client.newHazelcastClient();
+  const config = {
+    network: {
+      clusterMembers:  [`${HAZELCAST_HOST}:${HAZELCAST_PORT}`],
+    },
+  };
+  const client = await Client.newHazelcastClient(config);
 
   // Get the map named 'myMap'
   const map = await client.getMap('myMap');
@@ -33,12 +41,12 @@ async function main() {
   await map.put('name', 'mario');
 
   // Retrieve the value using the key
-  // const name = await map.get('name');
+  const name = await map.get('name');
   // console.log({ values: await map.values() });
 
 
   // Shutdown the Hazelcast client when done
-  const data = await map.values();
+  const data = name;
   await client.shutdown();
   return data
 }

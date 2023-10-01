@@ -7,5 +7,33 @@ services:
       - 5701:5701
     networks:
       - my_net
+  hazelcast-management-center:
+    container_name: hazelcast-management-center
+    image: hazelcast/management-center
+    ports:
+      - "8080:8080"
+    depends_on:
+      - hazelcast
+    environment:
+      - HZ_MC_CLUSTER_MEMBERS=hazelcast:5701
+    networks:
+      - my_net
+  api:
+    container_name: api
+    image: node:16
+    restart: unless-stopped
+    build:
+      dockerfile: ./infra/Dockerfile.api
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - HAZELCAST_HOST=hazelcast
+      - HAZELCAST_PORT=5701
+    networks:
+      - my_net
+    depends_on:
+      - hazelcast
 networks:
   my_net:

@@ -1,0 +1,30 @@
+{
+  "name": "hazelcast-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node src/app.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stdioh321/hazelcast-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stdioh321/hazelcast-test/issues"
+  },
+  "homepage": "https://github.com/stdioh321/hazelcast-test#readme",
+  "dependencies": {
+    "@types/express": "^4.17.18",
+    "@types/node": "^20.8.0",
+    "express": "^4.18.2",
+    "express-async-errors": "^3.1.1",
+    "hazelcast-client": "^5.3.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}

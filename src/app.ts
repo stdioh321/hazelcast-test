@@ -12,8 +12,19 @@ const HAZELCAST_PORT = process.env.HAZELCAST_PORT || 5701
 
 
 app.get('/', async (req, res) => {
+  const mapName = String(req.query.mapName || '')
+  const key = String(req.query.key || '')
 
-  const data = await main()
+  const data = await hazelcastGet(mapName, key)
+  res.appendHeader('content-type', 'application/json')
+  res.json({ data: data });
+});
+app.get('/set', async (req, res) => {
+  const mapName = String(req.query.mapName || '')
+  const key = String(req.query.key || '')
+  const value = String(req.query.value || '')
+
+  const data = await hazelcastSet(mapName, key, value)
   res.appendHeader('content-type', 'application/json')
   res.json({ data: data });
 });
@@ -25,29 +36,38 @@ app.listen(port, () => {
 
 
 
-async function main() {
-  // Configure Hazelcast client
+async function hazelcastSet(mapName: string, key: string, value: string) {
+  const client = await genHazelcastClient();
+
+  const map = await client.getMap(mapName);
+
+  await map.put(key, value);
+
+  const data = await map.get(key);
+  await client.shutdown();
+  return data
+}
+
+async function hazelcastGet(mapName: string, key: string) {
+  const client = await genHazelcastClient();
+  let data = null
+
+  const map = await client.getMap(mapName);
+  if (!key)
+    data = await map.entrySet();
+  else
+    data = await map.get(key);
+  await client.shutdown();
+  return data
+}
+
+async function genHazelcastClient() {
   const config = {
     network: {
-      clusterMembers:  [`${HAZELCAST_HOST}:${HAZELCAST_PORT}`],
+      clusterMembers: [`${HAZELCAST_HOST}:${HAZELCAST_PORT}`],
     },
   };
   const client = await Client.newHazelcastClient(config);
-
-  // Get the map named 'myMap'
-  const map = await client.getMap('myMap');
-
-  // Add a key-value pair to the map
-  await map.put('name', 'mario');
-
-  // Retrieve the value using the key
-  const name = await map.get('name');
-  // console.log({ values: await map.values() });
-
-
-  // Shutdown the Hazelcast client when done
-  const data = name;
-  await client.shutdown();
-  return data
+  return client;
 }
 
